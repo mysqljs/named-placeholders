@@ -18,7 +18,7 @@ see [this mysql2 discussion](https://github.com/sidorares/node-mysql2/issues/117
 
 ```js
 var mysql = require('mysql');
-var toUnnamed = require('named-placeholders');
+var toUnnamed = require('named-placeholders')();
 
 var q = toUnnamed('select 1+:test', { test: 123});
 mysl.createConnection().query(q[0], q[1]);
