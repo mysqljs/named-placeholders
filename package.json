@@ -22,5 +22,8 @@
     "mocha": "^1.21.4",
     "mocha.md": "^0.1.0",
     "should": "^4.0.4"
+  },
+  "dependencies": {
+    "lru-cache": "^2.5.0"
   }
 }
