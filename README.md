@@ -17,3 +17,7 @@ var toUnnamed = require('named-placeholders');
 var q = toUnnamed('select 1+:test', { test: 123});
 mysl.createConnection().query(q[0], q[1]);
 ```
+
+## credits
+
+parser is based on @mscdex code of his excellent [node-mariasql](https://github.com/mscdex/node-mariasql) library
