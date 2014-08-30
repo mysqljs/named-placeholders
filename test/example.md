@@ -1,6 +1,6 @@
 # given input query with named parameters
 
-it should build corresponding query with `?` placeholders and fill arrau of parameres from input object
+it should build corresponding query with `?` placeholders and fill array of parameres from input object
 
 ```js
   var compile = require('..')();
