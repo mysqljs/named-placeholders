@@ -77,7 +77,7 @@ var createCompiler = function(config) {
   function toArrayParams(tree, params) {
     var arr = [];
     if (tree.length == 1)
-      return [query, []];
+      return [tree[0], []];
     var tokens = tree[1];
     for (var i=0; i < tokens.length; ++i)
       arr.push(params[tokens[i]]);
