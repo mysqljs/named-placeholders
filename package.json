@@ -19,11 +19,11 @@
   "author": "Andrey Sidorov <sidorares@yandex.com>",
   "license": "MIT",
   "devDependencies": {
-    "mocha": "^1.21.4",
-    "mocha.md": "^0.1.0",
-    "should": "^4.0.4"
+    "mocha": "1.21.4",
+    "mocha.md": "0.1.0",
+    "should": "4.0.4"
   },
   "dependencies": {
-    "lru-cache": "^2.5.0"
+    "lru-cache": "2.5.0"
   }
 }
