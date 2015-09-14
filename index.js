@@ -84,12 +84,32 @@ var createCompiler = function(config) {
     return [tree[0], arr];
   }
 
+  function noTailingSemicolon(s) {
+    if (s.slice(-1) == ':')
+      return s.slice(0, -1);
+    return s;
+  }
+
   function join(tree) {
     if (tree.length == 1)
       return tree;
-    var unnamed = tree[0].join(config.placeholder);
-    if (tree[0].length == tree[1].length)
+
+    var unnamed = noTailingSemicolon(tree[0][0]);
+    for (var i=1; i < tree[0].length; ++i) {
+      if (tree[0][i-1].slice(-1) == ':') {
+        unnamed += config.placeholder;
+      }
       unnamed += config.placeholder;
+      unnamed += noTailingSemicolon(tree[0][i]);
+    }
+
+    var last = tree[0][tree[0].length -1];
+    if (tree[0].length == tree[1].length) {
+      if (last.slice(-1) == ':') {
+        unnamed += config.placeholder;
+      }
+      unnamed += config.placeholder;
+    }
     return [unnamed, tree[1]];
   }
 
@@ -107,4 +127,36 @@ var createCompiler = function(config) {
   return compile;
 }
 
+// named :one :two to postgres-style numbered $1 $2 $3
+var toNumbered = function(q, params) {
+  var tree = parse(q);
+  var paramsArr = [];
+  if (tree.length == 1)
+    return [tree[0], paramsArr];
+
+  var pIndexes = {};
+  var pLastIndex = 0;
+  var qs = '';
+  var varIndex;
+  var varNames = [];
+  for (var i=0; i < tree[0].length; ++i) {
+    varIndex = pIndexes[tree[1][i]];
+    if (!varIndex) {
+      varIndex = ++pLastIndex;
+      pIndexes[tree[1][i]] = varIndex;
+    }
+    if (tree[1][i]) {
+      varNames[varIndex - 1] = tree[1][i];
+      qs += tree[0][i] + '$' + varIndex;
+    } else {
+      qs += tree[0][i];
+    }
+  }
+  paramsArr = varNames.map(function(n) {
+    return params[n];
+  });
+  return [qs, paramsArr];
+}
+
 module.exports = createCompiler;
+module.exports.toNumbered = toNumbered;

@@ -1,6 +1,6 @@
 {
   "name": "named-placeholders",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "description": "sql named placeholders to unnamed compiler",
   "main": "index.js",
   "scripts": {
