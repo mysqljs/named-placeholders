@@ -78,6 +78,10 @@ var createCompiler = function(config) {
     var arr = [];
     if (tree.length == 1)
       return [tree[0], []];
+
+    if (typeof params == 'undefined')
+      throw new Error('Named query contains placeholders, but parameters object is undefined');
+
     var tokens = tree[1];
     for (var i=0; i < tokens.length; ++i)
       arr.push(params[tokens[i]]);

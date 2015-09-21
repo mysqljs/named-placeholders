@@ -12,9 +12,22 @@ it should build corresponding query with `?` placeholders and fill array of para
  [ 123, 123, 'Yes!', 'No!' ] ]);
 ```
 
-# when double semicolon is used
+it should throw error when query contains placeholders but parameters object not passed
 
-it should be replaced with `??` placeholders
+```js
+var compile = require('..')();
+var assert = require('assert');
+query = 'test ::p2 test :p1';
+
+assert.throws(
+  function() {
+    compile(query);
+  },
+  /Named query contains placeholders, but parameters object is undefined/
+);
+```
+
+it should replace ::name style placeholders with `??` placeholders
 
 ```js
   var compile = require('..')();
@@ -34,8 +47,9 @@ it should be replaced with `??` placeholders
   query = 'normal placeholder :p1 and double semicolon ::p2 test';
   compile(query, {p1: 'test1', p2: 'test2'})
     .should.eql([ 'normal placeholder ? and double semicolon ?? test', [ 'test1', 'test2' ] ]);
-
 ```
+
+
 # postgres-style toNumbered conversion
 
 basic test
