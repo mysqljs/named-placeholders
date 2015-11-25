@@ -10,6 +10,17 @@ it should build corresponding query with `?` placeholders and fill array of para
   compile(query, {id: 123, status: 'Yes!', complete_status: 'No!'})
     .should.eql([ 'Select users.json,EXISTS(Select 1 from moderators where moderators.id = ?) as is_moderator from users where users.id = ? and users.status = ? and users.complete_status = ?',
  [ 123, 123, 'Yes!', 'No!' ] ]);
+
+  // from https://github.com/sidorares/named-placeholders/issues/2
+  query = 'SELECT * FROM items WHERE id = :id AND deleted = "0000-00-00 00:00:00"';
+  compile(query, { id: Number(123) })
+    .should.eql([ 'SELECT * FROM items WHERE id = ? AND deleted = "0000-00-00 00:00:00"',
+  [ 123 ] ]);
+
+  query = 'SELECT * FROM items WHERE deleted = "0000-00-00 00:00:00" AND id = :id';
+  compile(query, { id: Number(123) })
+    .should.eql([ 'SELECT * FROM items WHERE deleted = "0000-00-00 00:00:00" AND id = ?',
+  [ 123 ] ]);
 ```
 
 it should throw error when query contains placeholders but parameters object not passed

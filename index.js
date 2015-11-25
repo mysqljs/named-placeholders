@@ -13,6 +13,7 @@ var parse = function(query) {
 
   var ppos = RE_PARAM.exec(query), curpos = 0, start = 0, end, parts = [],
       i, chr, inQuote = false, escape = false, qchr, tokens = [], qcnt = 0, fn;
+  var lastTokenEndPos = 0;
 
   if (ppos) {
     do {
@@ -42,14 +43,14 @@ var parse = function(query) {
         parts.push(query.substring(start, end));
         tokens.push(ppos[0].length === 1 ? qcnt++ : ppos[1]);
         start = end + ppos[0].length;
+        lastTokenEndPos = start;
       }
       curpos = end + ppos[0].length;
     } while (ppos = RE_PARAM.exec(query));
 
     if (tokens.length) {
       if (curpos < query.length)
-        parts.push(query.substring(curpos));
-
+        parts.push(query.substring(lastTokenEndPos));
       return [parts, tokens];
     }
   }
