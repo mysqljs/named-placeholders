@@ -21,7 +21,7 @@ var mysql = require('mysql');
 var toUnnamed = require('named-placeholders')();
 
 var q = toUnnamed('select 1+:test', { test: 123});
-mysl.createConnection().query(q[0], q[1]);
+mysql.createConnection().query(q[0], q[1]);
 ```
 
 ## credits
