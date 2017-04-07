@@ -1,7 +1,7 @@
 // based on code from Brian White @mscdex mariasql library - https://github.com/mscdex/node-mariasql/blob/master/lib/Client.js#L272-L332
 // License: https://github.com/mscdex/node-mariasql/blob/master/LICENSE
 
-var RE_PARAM = /(?:\?)|(?::(\d+|(?:[a-zA-Z][a-zA-Z0-9_]*)))/g,
+var RE_PARAM = /(?:\?)|(?::(\d+|(?:[a-zA-Z_][a-zA-Z0-9_]*)))/g,
     DQUOTE = 34,
     SQUOTE = 39,
     BSLASH = 92;
