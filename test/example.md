@@ -60,6 +60,15 @@ it should replace ::name style placeholders with `??` placeholders
     .should.eql([ 'normal placeholder ? and double semicolon ?? test', [ 'test1', 'test2' ] ]);
 ```
 
+it should replace :name style placeholders that start with `_`
+
+```js
+  var compile = require('..')();
+
+  query = 'normal placeholder :p1 and underscore-leading placeholder :_p2 test';
+  compile(query, {p1: 'test1', _p2: 'test2'})
+    .should.eql([ 'normal placeholder ? and underscore-leading placeholder ? test', [ 'test1', 'test2' ] ]);
+```
 
 # postgres-style toNumbered conversion
 
