@@ -12,13 +12,14 @@ var parse = function(query) {
     return cqfn;
 
   var ppos = RE_PARAM.exec(query), curpos = 0, start = 0, end, parts = [],
-      i, chr, inQuote = false, escape = false, qchr, tokens = [], qcnt = 0, fn;
+      i, chr, inQuote = 0, escape = false, tokens = [], qcnt = 0, fn, isQuote = false;
   var lastTokenEndPos = 0;
 
   if (ppos) {
     do {
       for (i=curpos,end=ppos.index; i<end; ++i) {
         chr = query.charCodeAt(i);
+        isQuote = chr === DQUOTE || chr === SQUOTE;
         if (chr === BSLASH)
           escape = !escape;
         else {
@@ -26,16 +27,15 @@ var parse = function(query) {
             escape = false;
             continue;
           }
-          if (inQuote && chr === qchr) {
-            if (query.charCodeAt(i + 1) === qchr) {
+          if (inQuote && isQuote) {
+            if (query.charCodeAt(i + 1) === chr) {
               // quote escaped via "" or ''
               ++i;
               continue;
             }
-            inQuote = false;
-          } else if (chr === DQUOTE || chr === SQUOTE) {
-            inQuote = true;
-            qchr = chr;
+            inQuote--;
+          } else if (isQuote) {
+            inQuote++;
           }
         }
       }
