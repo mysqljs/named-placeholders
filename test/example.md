@@ -43,13 +43,9 @@ it should replace placeholders in queries with json path containing double quote
 ```js
   var compile = require('..')();
 
-  var query = `SELECT jsonColumn->>'$."propertyName"' FROM items WHERE id = :id`;
+  var query = 'SELECT jsonColumn->>\'$."propertyName"\' FROM items WHERE id = :id';
   compile(query, { id: 123 })
-    .should.eql([ `SELECT jsonColumn->>'$.\"propertyName\"' FROM items WHERE id = ?`, [ 123 ] ]);
-
-  var query = `SELECT jsonColumn->>'$.\"propertyName\"' FROM items WHERE id = :id`;
-  compile(query, { id: 123 })
-    .should.eql([ `SELECT jsonColumn->>'$.\"propertyName\"' FROM items WHERE id = ?`, [ 123 ] ]);
+    .should.eql([ 'SELECT jsonColumn->>\'$.\"propertyName\"\' FROM items WHERE id = ?', [ 123 ] ]);
 ```
 
 it should replace ::name style placeholders with `??` placeholders
