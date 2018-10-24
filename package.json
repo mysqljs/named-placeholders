@@ -16,14 +16,17 @@
     "named",
     "placeholders"
   ],
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "author": "Andrey Sidorov <sidorares@yandex.com>",
+  "files": [],
   "license": "MIT",
   "devDependencies": {
-    "mocha": "1.21.4",
-    "mocha.md": "0.1.0",
-    "should": "4.0.4"
+    "mocha": "^5.2.0",
+    "should": "^13.2.3"
   },
   "dependencies": {
-    "lru-cache": "2.5.0"
+    "lru-cache": "^4.1.3"
   }
 }
