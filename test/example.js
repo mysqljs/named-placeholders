@@ -23,6 +23,11 @@ describe('given input query with named parameters', () => {
     compile(query, { id: Number(123) })
     .should.eql([ 'SELECT * FROM items WHERE deleted = "0000-00-00 00:00:00" AND id = ?',
     [ 123 ] ]);
+
+    query = 'SELECT * FROM items WHERE deleted = "0000-00-00 00:00:00" AND `dot.id` = :dot.id';
+    compile(query, { 'dot.id': Number(123) })
+    .should.eql([ 'SELECT * FROM items WHERE deleted = "0000-00-00 00:00:00" AND `dot.id` = ?',
+    [ 123 ] ]);
   });
 
   it('should throw error when query contains placeholders but parameters object not passed', () => {
