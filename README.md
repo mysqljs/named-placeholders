@@ -2,7 +2,7 @@
 
 [![NPM](https://nodei.co/npm/named-placeholders.png?downloads=true&stars=true)](https://nodei.co/npm/named-placeholders/)
 
-[![Build Status](https://secure.travis-ci.org/sidorares/named-placeholders.png)](http://travis-ci.org/sidorares/named-placeholders)
+[![CI](https://github.com/mysqljs/named-placeholders/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/mysqljs/named-placeholders/actions/workflows/ci.yml)
 
 # named-placeholders
 
