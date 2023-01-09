@@ -65,8 +65,6 @@ function parse(query) {
   return [query];
 };
 
-const EMPTY_LRU_FN = (key, value) => {};
-
 function createCompiler(config) {
   if (!config)
   config = {};
@@ -82,7 +80,7 @@ function createCompiler(config) {
     cache = config.cache;
   }
   if (config.cache !== false && !cache) {
-    cache = require('lru-cache')({ max: ncache, dispose: EMPTY_LRU_FN });
+    cache = new (require('lru-cache'))({ max: ncache });
   }
 
   function toArrayParams(tree, params) {
