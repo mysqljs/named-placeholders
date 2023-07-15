@@ -1,5 +1,3 @@
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sidorares&url=https://github.com/sidorares/named-placeholders&title=named-placeholders&language=&tags=github&category=software)
-
 [![NPM](https://nodei.co/npm/named-placeholders.png?downloads=true&stars=true)](https://nodei.co/npm/named-placeholders/)
 
 [![CI](https://github.com/mysqljs/named-placeholders/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/mysqljs/named-placeholders/actions/workflows/ci.yml)
