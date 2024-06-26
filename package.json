@@ -23,7 +23,7 @@
   "files": [],
   "license": "MIT",
   "devDependencies": {
-    "mocha": "^5.2.0",
+    "mocha": "^10.5.2",
     "should": "^13.2.3"
   },
   "dependencies": {
