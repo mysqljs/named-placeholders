@@ -27,6 +27,6 @@
     "should": "^13.2.3"
   },
   "dependencies": {
-    "lru-cache": "^7.14.1"
+    "lru-cache": "^10.3.0"
   }
 }
