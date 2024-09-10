@@ -4,7 +4,7 @@
   "description": "sql named placeholders to unnamed compiler",
   "main": "index.js",
   "scripts": {
-    "test": "node --test test/**/*.js"
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
