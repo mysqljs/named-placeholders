@@ -22,11 +22,7 @@
   "author": "Andrey Sidorov <sidorares@yandex.com>",
   "files": [],
   "license": "MIT",
-  "devDependencies": {
-    "mocha": "^5.2.0",
-    "should": "^13.2.3"
-  },
   "dependencies": {
-    "lru-cache": "^7.14.1"
+    "lru-cache": "^8.0.5"
   }
 }
