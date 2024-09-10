@@ -80,7 +80,7 @@ function createCompiler(config) {
     cache = config.cache;
   }
   if (config.cache !== false && !cache) {
-    cache = new (require('lru-cache'))({ max: ncache });
+    cache = (require('lru.min').createLRU)({ max: ncache });
   }
 
   function toArrayParams(tree, params) {

@@ -23,6 +23,6 @@
   "files": [],
   "license": "MIT",
   "dependencies": {
-    "lru-cache": "^8.0.5"
+    "lru.min": "^1.1.0"
   }
 }
