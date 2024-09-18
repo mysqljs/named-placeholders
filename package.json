@@ -4,7 +4,7 @@
   "description": "sql named placeholders to unnamed compiler",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
@@ -17,16 +17,12 @@
     "placeholders"
   ],
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=8.0.0"
   },
   "author": "Andrey Sidorov <sidorares@yandex.com>",
   "files": [],
   "license": "MIT",
-  "devDependencies": {
-    "mocha": "^5.2.0",
-    "should": "^13.2.3"
-  },
   "dependencies": {
-    "lru-cache": "^7.14.1"
+    "lru.min": "^1.1.0"
   }
 }
