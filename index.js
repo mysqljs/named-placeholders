@@ -40,7 +40,7 @@ function parse(query) {
               continue;
             }
             inQuote = false;
-          } else if (chr === DQUOTE || chr === SQUOTE) {
+          } else if (!inQuote && (chr === DQUOTE || chr === SQUOTE)) {
             inQuote = true;
             qchr = chr;
           }

@@ -61,6 +61,40 @@ describe('given input query with named parameters', () => {
     assert.deepEqual(compile(query, { id: 123 }), expected);
     assert.deepEqual(compile(query, { id: 123 }), expected);
   });
+
+  it('should handle queries with mixed/nested quotes correctly', () => {
+    // Bug fix test: queries with single and double quotes mixed should parse all parameters
+    const query = `SELECT * FROM items WHERE name = 'foo "bar"' AND id = :id AND status = :status`;
+    const result = compile(query, { id: 123, status: 'active' });
+
+    assert.strictEqual(result[1].length, 2, 'Should extract both parameters');
+    assert.deepEqual(result[1], [123, 'active']);
+  });
+
+  it('should handle large queries with multiple parameters after quoted strings', () => {
+    // Real-world scenario: complex query with nested quotes and multiple parameters
+    const query = `Select users.json,
+      CASE
+        WHEN users.role = 'admin'
+        THEN CONCAT('"', users.name, '"')
+        ELSE users.name
+      END AS label
+      from users
+      where users.id = :id
+        and users.created = :created
+        and users.updated = :updated
+        and users.status = :status`;
+
+    const result = compile(query, {
+      id: 100,
+      created: '2024-01-01',
+      updated: '2024-12-31',
+      status: 'active'
+    });
+
+    assert.strictEqual(result[1].length, 4, 'Should extract all 4 parameters');
+    assert.deepEqual(result[1], [100, '2024-01-01', '2024-12-31', 'active']);
+  });
 });
 
 describe('postgres-style toNumbered conversion', () => {
