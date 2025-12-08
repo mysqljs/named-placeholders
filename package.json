@@ -16,7 +16,9 @@
     "sql",
     "pdo",
     "named",
-    "placeholders"
+    "placeholders",
+    "mysql",
+    "postgres"
   ],
   "engines": {
     "node": ">=8.0.0"
