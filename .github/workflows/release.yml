@@ -1,8 +1,13 @@
+name: release-please
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  issues: write
 on:
   push:
     branches:
       - master
-name: release-please
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -10,23 +15,25 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
           package-name: named-placeholders
           changelog-path: 'Changelog.md'
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         if: ${{ steps.release.outputs.release_created }}
         with:
-          node-version: 16
+          check-latest: true
+          node-version: lts/*
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
         if: ${{ steps.release.outputs.release_created }}
 
-      - run: npm publish
+      - run: npm publish --provenance
         if: ${{ steps.release.outputs.release_created }}
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
