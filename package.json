@@ -4,7 +4,9 @@
   "description": "sql named placeholders to unnamed compiler",
   "main": "index.js",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write .github/workflows/*.yml ."
   },
   "repository": {
     "type": "git",
@@ -24,5 +26,8 @@
   "license": "MIT",
   "dependencies": {
     "lru.min": "^1.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4"
   }
 }
