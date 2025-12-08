@@ -25,7 +25,7 @@ function parse(query) {
   if (ppos) {
     do {
       for (i = curpos, end = ppos.index; i < end; ++i) {
-        let chr = query.charCodeAt(i);
+        const chr = query.charCodeAt(i);
         if (chr === BSLASH) escape = !escape;
         else {
           if (escape) {
@@ -83,11 +83,11 @@ function createCompiler(config) {
 
   function toArrayParams(tree, params) {
     const arr = [];
-    if (tree.length == 1) {
+    if (tree.length === 1) {
       return [tree[0], []];
     }
 
-    if (typeof params == 'undefined')
+    if (typeof params === 'undefined')
       throw new Error(
         'Named query contains placeholders, but parameters object is undefined'
       );
@@ -100,20 +100,20 @@ function createCompiler(config) {
   }
 
   function noTailingSemicolon(s) {
-    if (s.slice(-1) == ':') {
+    if (s.slice(-1) === ':') {
       return s.slice(0, -1);
     }
     return s;
   }
 
   function join(tree) {
-    if (tree.length == 1) {
+    if (tree.length === 1) {
       return tree;
     }
 
     let unnamed = noTailingSemicolon(tree[0][0]);
     for (let i = 1; i < tree[0].length; ++i) {
-      if (tree[0][i - 1].slice(-1) == ':') {
+      if (tree[0][i - 1].slice(-1) === ':') {
         unnamed += config.placeholder;
       }
       unnamed += config.placeholder;
@@ -121,8 +121,8 @@ function createCompiler(config) {
     }
 
     const last = tree[0][tree[0].length - 1];
-    if (tree[0].length == tree[1].length) {
-      if (last.slice(-1) == ':') {
+    if (tree[0].length === tree[1].length) {
+      if (last.slice(-1) === ':') {
         unnamed += config.placeholder;
       }
       unnamed += config.placeholder;
@@ -150,7 +150,7 @@ function createCompiler(config) {
 function toNumbered(q, params) {
   const tree = parse(q);
   const paramsArr = [];
-  if (tree.length == 1) {
+  if (tree.length === 1) {
     return [tree[0], paramsArr];
   }
 
@@ -167,7 +167,7 @@ function toNumbered(q, params) {
     }
     if (tree[1][i]) {
       varNames[varIndex - 1] = tree[1][i];
-      qs += tree[0][i] + '$' + varIndex;
+      qs += `${tree[0][i]}$${varIndex}`;
     } else {
       qs += tree[0][i];
     }
