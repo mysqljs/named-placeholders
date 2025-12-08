@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
 
-    name: Lint
+    name: Check
 
     steps:
       - uses: actions/checkout@v4
