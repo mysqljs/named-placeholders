@@ -4,9 +4,9 @@
 // License: https://github.com/mscdex/node-mariasql/blob/master/LICENSE
 
 const RE_PARAM = /(?:\?)|(?::(\d+|(?:[a-zA-Z][a-zA-Z0-9_]*)))/g,
-DQUOTE = 34,
-SQUOTE = 39,
-BSLASH = 92;
+  DQUOTE = 34,
+  SQUOTE = 39,
+  BSLASH = 92;
 
 function parse(query) {
   let ppos = RE_PARAM.exec(query);
@@ -24,10 +24,9 @@ function parse(query) {
 
   if (ppos) {
     do {
-      for (i=curpos,end=ppos.index; i<end; ++i) {
+      for (i = curpos, end = ppos.index; i < end; ++i) {
         let chr = query.charCodeAt(i);
-        if (chr === BSLASH)
-        escape = !escape;
+        if (chr === BSLASH) escape = !escape;
         else {
           if (escape) {
             escape = false;
@@ -53,7 +52,7 @@ function parse(query) {
         lastTokenEndPos = start;
       }
       curpos = end + ppos[0].length;
-    } while (ppos = RE_PARAM.exec(query));
+    } while ((ppos = RE_PARAM.exec(query)));
 
     if (tokens.length) {
       if (curpos < query.length) {
@@ -63,11 +62,10 @@ function parse(query) {
     }
   }
   return [query];
-};
+}
 
 function createCompiler(config) {
-  if (!config)
-  config = {};
+  if (!config) config = {};
   if (!config.placeholder) {
     config.placeholder = '?';
   }
@@ -80,7 +78,7 @@ function createCompiler(config) {
     cache = config.cache;
   }
   if (config.cache !== false && !cache) {
-    cache = (require('lru.min').createLRU)({ max: ncache });
+    cache = require('lru.min').createLRU({ max: ncache });
   }
 
   function toArrayParams(tree, params) {
@@ -90,10 +88,12 @@ function createCompiler(config) {
     }
 
     if (typeof params == 'undefined')
-      throw new Error('Named query contains placeholders, but parameters object is undefined');
+      throw new Error(
+        'Named query contains placeholders, but parameters object is undefined'
+      );
 
     const tokens = tree[1];
-    for (let i=0; i < tokens.length; ++i) {
+    for (let i = 0; i < tokens.length; ++i) {
       arr.push(params[tokens[i]]);
     }
     return [tree[0], arr];
@@ -112,15 +112,15 @@ function createCompiler(config) {
     }
 
     let unnamed = noTailingSemicolon(tree[0][0]);
-    for (let i=1; i < tree[0].length; ++i) {
-      if (tree[0][i-1].slice(-1) == ':') {
+    for (let i = 1; i < tree[0].length; ++i) {
+      if (tree[0][i - 1].slice(-1) == ':') {
         unnamed += config.placeholder;
       }
       unnamed += config.placeholder;
       unnamed += noTailingSemicolon(tree[0][i]);
     }
 
-    const last = tree[0][tree[0].length -1];
+    const last = tree[0][tree[0].length - 1];
     if (tree[0].length == tree[1].length) {
       if (last.slice(-1) == ':') {
         unnamed += config.placeholder;
@@ -133,10 +133,10 @@ function createCompiler(config) {
   function compile(query, paramsObj) {
     let tree;
     if (cache && (tree = cache.get(query))) {
-      return toArrayParams(tree, paramsObj)
+      return toArrayParams(tree, paramsObj);
     }
     tree = join(parse(query));
-    if(cache) {
+    if (cache) {
       cache.set(query, tree);
     }
     return toArrayParams(tree, paramsObj);
@@ -159,7 +159,7 @@ function toNumbered(q, params) {
   let qs = '';
   let varIndex;
   const varNames = [];
-  for (let i=0; i < tree[0].length; ++i) {
+  for (let i = 0; i < tree[0].length; ++i) {
     varIndex = pIndexes[tree[1][i]];
     if (!varIndex) {
       varIndex = ++pLastIndex;
@@ -172,7 +172,7 @@ function toNumbered(q, params) {
       qs += tree[0][i];
     }
   }
-  return [qs, varNames.map(n => params[n])];
+  return [qs, varNames.map((n) => params[n])];
 }
 
 module.exports = createCompiler;
