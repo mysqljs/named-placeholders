@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node --test",
-    "lint": "prettier --check .",
-    "lint:fix": "prettier --write .github/workflows/*.yml ."
+    "lint": "biome lint --error-on-warnings && prettier --check .",
+    "lint:fix": "biome lint --write && prettier --write .github/workflows/*.yml ."
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "lru.min": "^1.1.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
     "prettier": "^3.7.4"
   }
 }
