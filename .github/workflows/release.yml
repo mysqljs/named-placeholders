@@ -20,10 +20,10 @@ jobs:
           package-name: named-placeholders
           changelog-path: 'Changelog.md'
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         if: ${{ steps.release.outputs.release_created }}
         with:
           check-latest: true
