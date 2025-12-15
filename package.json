@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sidorares/named-placeholders"
+    "url": "https://github.com/mysqljs/named-placeholders"
   },
   "keywords": [
     "sql",

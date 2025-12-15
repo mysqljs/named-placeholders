@@ -21,7 +21,7 @@ describe('given input query with named parameters', () => {
       [123, 123, 'Yes!', 'No!'],
     ]);
 
-    // from https://github.com/sidorares/named-placeholders/issues/2
+    // from https://github.com/mysqljs/named-placeholders/issues/2
     query =
       'SELECT * FROM items WHERE id = :id AND deleted = "0000-00-00 00:00:00"';
     const result2 = compile(query, { id: Number(123) });
