@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.5](https://github.com/mysqljs/named-placeholders/compare/v1.1.4...v1.1.5) (2025-12-15)
+
+
+### Bug Fixes
+
+* improve handling of mixed/nested quotes in query parsing ([aee5c5d](https://github.com/mysqljs/named-placeholders/commit/aee5c5d1ea4b2ba65e7bda16280287a42046481c))
+* improve handling of mixed/nested quotes in query parsing ([#39](https://github.com/mysqljs/named-placeholders/issues/39)) ([aee5c5d](https://github.com/mysqljs/named-placeholders/commit/aee5c5d1ea4b2ba65e7bda16280287a42046481c))
+
 ## [1.1.4](https://github.com/mysqljs/named-placeholders/compare/v1.1.3...v1.1.4) (2025-12-05)
 
 
