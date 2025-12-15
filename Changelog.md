@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/mysqljs/named-placeholders/compare/v1.1.5...v1.1.6) (2025-12-15)
+
+
+### Bug Fixes
+
+* update repository URL to reflect correct GitHub path ([#56](https://github.com/mysqljs/named-placeholders/issues/56)) ([17c6daa](https://github.com/mysqljs/named-placeholders/commit/17c6daafb08d1edb06952146efdbf0f97263db25))
+
 ## [1.1.5](https://github.com/mysqljs/named-placeholders/compare/v1.1.4...v1.1.5) (2025-12-15)
 
 
