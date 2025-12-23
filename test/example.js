@@ -113,6 +113,21 @@ describe('given input query with named parameters', () => {
     assert.strictEqual(result[1].length, 4, 'Should extract all 4 parameters');
     assert.deepEqual(result[1], [100, '2024-01-01', '2024-12-31', 'active']);
   });
+
+  it('should support parameters starting with underscore', () => {
+    // Parameters can start with underscore character
+    let query = 'SELECT * FROM users WHERE id = :_id AND role = :_role';
+    assert.deepEqual(compile(query, { _id: 123, _role: 'admin' }), [
+      'SELECT * FROM users WHERE id = ? AND role = ?',
+      [123, 'admin'],
+    ]);
+
+    query = 'SELECT * FROM users WHERE _internal_id = :_internal_id AND _status = :_status AND name = :_name';
+    assert.deepEqual(compile(query, { _internal_id: 456, _status: 'active', _name: 'John' }), [
+      'SELECT * FROM users WHERE _internal_id = ? AND _status = ? AND name = ?',
+      [456, 'active', 'John'],
+    ]);
+  });
 });
 
 describe('postgres-style toNumbered conversion', () => {
