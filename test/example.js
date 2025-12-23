@@ -122,11 +122,15 @@ describe('given input query with named parameters', () => {
       [123, 'admin'],
     ]);
 
-    query = 'SELECT * FROM users WHERE _internal_id = :_internal_id AND _status = :_status AND name = :_name';
-    assert.deepEqual(compile(query, { _internal_id: 456, _status: 'active', _name: 'John' }), [
-      'SELECT * FROM users WHERE _internal_id = ? AND _status = ? AND name = ?',
-      [456, 'active', 'John'],
-    ]);
+    query =
+      'SELECT * FROM users WHERE _internal_id = :_internal_id AND _status = :_status AND name = :_name';
+    assert.deepEqual(
+      compile(query, { _internal_id: 456, _status: 'active', _name: 'John' }),
+      [
+        'SELECT * FROM users WHERE _internal_id = ? AND _status = ? AND name = ?',
+        [456, 'active', 'John'],
+      ]
+    );
   });
 });
 
