@@ -115,7 +115,6 @@ describe('given input query with named parameters', () => {
   });
 
   it('should support parameters starting with underscore', () => {
-    // Parameters can start with underscore character
     let query = 'SELECT * FROM users WHERE id = :_id AND role = :_role';
     assert.deepEqual(compile(query, { _id: 123, _role: 'admin' }), [
       'SELECT * FROM users WHERE id = ? AND role = ?',
