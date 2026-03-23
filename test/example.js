@@ -115,6 +115,133 @@ describe('given input query with named parameters', () => {
   });
 });
 
+describe('SQL comment handling', () => {
+  it('should substitute all :param occurrences when -- comments contain single quotes (issue #9)', () => {
+    // A single quote inside a -- comment must not toggle inQuote state and
+    // cause subsequent :param tokens to be silently skipped.
+    const query = `
+      SELECT :foo AS foo
+      UNION ALL
+      -- dan's comment
+      SELECT :foo AS foo
+      UNION ALL
+      -- dan's other comment
+      SELECT :foo AS foo
+    `;
+    const result = compile(query, { foo: 'woof' });
+    assert.strictEqual(
+      result[1].length,
+      3,
+      'all three :foo tokens should be resolved'
+    );
+    assert.deepEqual(result[1], ['woof', 'woof', 'woof']);
+  });
+
+  it('should ignore :param tokens inside -- line comments', () => {
+    const query = [
+      '-- Optional fields: IFNULL(:phantom, existing) preserves existing value',
+      'INSERT INTO t (col) VALUES (:real)',
+    ].join('\n');
+    const result = compile(query, { real: 42 });
+    assert.strictEqual(
+      result[1].length,
+      1,
+      ':phantom in comment should not appear in params'
+    );
+    assert.deepEqual(result[1], [42]);
+  });
+
+  it('should ignore :param tokens inside /* */ block comments', () => {
+    const query = [
+      '/* insert row -- :ignored is illustrative */',
+      'INSERT INTO t (col) VALUES (:real)',
+    ].join('\n');
+    const result = compile(query, { real: 42 });
+    assert.strictEqual(
+      result[1].length,
+      1,
+      ':ignored in block comment should not appear in params'
+    );
+    assert.deepEqual(result[1], [42]);
+  });
+
+  it('should ignore :param tokens inside # line comments', () => {
+    const query = [
+      '# fetch row :userId is illustrative',
+      'SELECT :id FROM users',
+    ].join('\n');
+    const result = compile(query, { id: 7 });
+    assert.strictEqual(
+      result[1].length,
+      1,
+      ':userId in # comment should not appear in params'
+    );
+    assert.deepEqual(result[1], [7]);
+  });
+
+  it('should not treat -- inside a quoted string as a comment', () => {
+    const query = `SELECT * FROM t WHERE status = '--not-a-comment' AND id = :id`;
+    const result = compile(query, { id: 5 });
+    assert.deepEqual(result, [
+      `SELECT * FROM t WHERE status = '--not-a-comment' AND id = ?`,
+      [5],
+    ]);
+  });
+
+  it('should not treat /* inside a quoted string as a block comment', () => {
+    const query = `SELECT * FROM t WHERE name = '/* not a comment */' AND id = :id`;
+    const result = compile(query, { id: 9 });
+    assert.deepEqual(result, [
+      `SELECT * FROM t WHERE name = '/* not a comment */' AND id = ?`,
+      [9],
+    ]);
+  });
+
+  it('should not corrupt quote state from quotes inside -- comments', () => {
+    // A quote inside a comment must not leave inQuote = true for the next token.
+    const query = ["-- it's a comment", 'SELECT :val FROM t'].join('\n');
+    const result = compile(query, { val: 1 });
+    assert.deepEqual(result[1], [1]);
+  });
+
+  it('should not corrupt quote state from quotes inside /* */ block comments', () => {
+    const query = [
+      "/* don't toggle inQuote: it's only a comment */",
+      'SELECT :val FROM t',
+    ].join('\n');
+    const result = compile(query, { val: 1 });
+    assert.deepEqual(result[1], [1]);
+  });
+
+  it('should handle mixed real params, comment tokens, and quoted strings together', () => {
+    const query = [
+      '-- upsert: IFNULL(:phantom, existing) preserves existing value',
+      '/* :also_phantom */',
+      'INSERT INTO t (a, b) VALUES (:a, :b)',
+      '-- trailing comment :skip',
+    ].join('\n');
+    const result = compile(query, { a: 1, b: 2 });
+    assert.strictEqual(
+      result[1].length,
+      2,
+      'only :a and :b should be extracted'
+    );
+    assert.deepEqual(result[1], [1, 2]);
+  });
+
+  it('toNumbered should ignore :param tokens inside comments', () => {
+    const toNumbered = require('..').toNumbered;
+    const query = [
+      '-- :phantom should not appear',
+      'SELECT :id, :name FROM users',
+    ].join('\n');
+    const result = toNumbered(query, { id: 1, name: 'Alice' });
+    assert.ok(result[0].includes('$1'), 'should contain $1');
+    assert.ok(result[0].includes('$2'), 'should contain $2');
+    assert.deepEqual(result[1], [1, 'Alice']);
+  });
+});
+
 describe('postgres-style toNumbered conversion', () => {
   it('basic test', () => {
     const toNumbered = require('..').toNumbered;

@@ -6,7 +6,12 @@
 const RE_PARAM = /(?:\?)|(?::(\d+|(?:[a-zA-Z][a-zA-Z0-9_]*)))/g,
   DQUOTE = 34,
   SQUOTE = 39,
-  BSLASH = 92;
+  BSLASH = 92,
+  DASH = 45,
+  HASH = 35,
+  NEWLINE = 10,
+  FSLASH = 47,
+  STAR = 42;
 
 function parse(query) {
   let ppos = RE_PARAM.exec(query);
@@ -15,6 +20,8 @@ function parse(query) {
   let end;
   const parts = [];
   let inQuote = false;
+  let inLineComment = false;
+  let inBlockComment = false;
   let escape = false;
   let qchr;
   const tokens = [];
@@ -26,6 +33,17 @@ function parse(query) {
     do {
       for (i = curpos, end = ppos.index; i < end; ++i) {
         const chr = query.charCodeAt(i);
+        if (inBlockComment) {
+          if (chr === STAR && query.charCodeAt(i + 1) === FSLASH) {
+            inBlockComment = false;
+            ++i; // skip the closing '/'
+          }
+          continue;
+        }
+        if (inLineComment) {
+          if (chr === NEWLINE) inLineComment = false;
+          continue;
+        }
         if (chr === BSLASH) escape = !escape;
         else {
           if (escape) {
@@ -39,13 +57,23 @@ function parse(query) {
               continue;
             }
             inQuote = false;
-          } else if (!inQuote && (chr === DQUOTE || chr === SQUOTE)) {
-            inQuote = true;
-            qchr = chr;
+          } else if (!inQuote) {
+            if (chr === DQUOTE || chr === SQUOTE) {
+              inQuote = true;
+              qchr = chr;
+            } else if (chr === DASH && query.charCodeAt(i + 1) === DASH) {
+              inLineComment = true;
+              ++i; // skip the second '-'
+            } else if (chr === HASH) {
+              inLineComment = true;
+            } else if (chr === FSLASH && query.charCodeAt(i + 1) === STAR) {
+              inBlockComment = true;
+              ++i; // skip the opening '*'
+            }
           }
         }
       }
-      if (!inQuote) {
+      if (!inQuote && !inLineComment && !inBlockComment) {
         parts.push(query.substring(start, end));
         tokens.push(ppos[0].length === 1 ? qcnt++ : ppos[1]);
         start = end + ppos[0].length;
