@@ -113,6 +113,17 @@ describe('given input query with named parameters', () => {
     assert.strictEqual(result[1].length, 4, 'Should extract all 4 parameters');
     assert.deepEqual(result[1], [100, '2024-01-01', '2024-12-31', 'active']);
   });
+
+  it('should continue parsing placeholders after an escaped colon inside a quoted string', () => {
+    const query =
+      "SELECT * FROM certificate WHERE certificate_no = '\\:certificateNo' AND status = :status";
+    const result = compile(query, { status: 'active' });
+
+    assert.deepEqual(result, [
+      "SELECT * FROM certificate WHERE certificate_no = '\\:certificateNo' AND status = ?",
+      ['active'],
+    ]);
+  });
 });
 
 describe('postgres-style toNumbered conversion', () => {
