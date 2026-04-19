@@ -45,6 +45,7 @@ function parse(query) {
           }
         }
       }
+      escape = false;
       if (!inQuote) {
         parts.push(query.substring(start, end));
         tokens.push(ppos[0].length === 1 ? qcnt++ : ppos[1]);
