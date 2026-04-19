@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.7](https://github.com/mysqljs/named-placeholders/compare/v1.1.6...v1.1.7) (2026-04-19)
+
+
+### Bug Fixes
+
+* reset escape state after placeholder parsing ([#83](https://github.com/mysqljs/named-placeholders/issues/83)) ([579e60d](https://github.com/mysqljs/named-placeholders/commit/579e60d5d8662ca0768f55699f8fdbb29cd479eb))
+
 ## [1.1.6](https://github.com/mysqljs/named-placeholders/compare/v1.1.5...v1.1.6) (2025-12-15)
 
 
