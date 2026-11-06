@@ -124,6 +124,42 @@ describe('given input query with named parameters', () => {
       ['active'],
     ]);
   });
+
+  it('should not read a named placeholder inside a backtick-quoted identifier', () => {
+    const query = 'UPDATE items SET `label:fr` = :label WHERE id = :id';
+    const result = compile(query, { fr: 'unused', label: 'hello', id: 1 });
+
+    assert.deepEqual(result, [
+      'UPDATE items SET `label:fr` = ? WHERE id = ?',
+      ['hello', 1],
+    ]);
+  });
+
+  it('should not read a `?` inside a backtick-quoted identifier', () => {
+    // MySQL accepts a `?` in a quoted column name: read as a placeholder,
+    // it takes a slot and every value after it moves one place
+    const query = 'UPDATE items SET `label?` = :label WHERE id = :id';
+    const result = compile(query, { label: 'hello', id: 1 });
+
+    assert.deepEqual(result, [
+      'UPDATE items SET `label?` = ? WHERE id = ?',
+      ['hello', 1],
+    ]);
+  });
+
+  it('should read a backslash inside a backtick-quoted identifier as a plain character', () => {
+    const query = 'SELECT `a\\` FROM items WHERE id = :id';
+    const result = compile(query, { id: 1 });
+
+    assert.deepEqual(result, ['SELECT `a\\` FROM items WHERE id = ?', [1]]);
+  });
+
+  it('should handle a doubled backtick inside an identifier', () => {
+    const query = 'SELECT `a``:b` FROM items WHERE id = :id';
+    const result = compile(query, { b: 'unused', id: 1 });
+
+    assert.deepEqual(result, ['SELECT `a``:b` FROM items WHERE id = ?', [1]]);
+  });
 });
 
 describe('postgres-style toNumbered conversion', () => {
