@@ -6,6 +6,7 @@
 const RE_PARAM = /(?:\?)|(?::(\d+|(?:[a-zA-Z][a-zA-Z0-9_]*)))/g,
   DQUOTE = 34,
   SQUOTE = 39,
+  BACKTICK = 96,
   BSLASH = 92;
 
 function parse(query) {
@@ -26,7 +27,8 @@ function parse(query) {
     do {
       for (i = curpos, end = ppos.index; i < end; ++i) {
         const chr = query.charCodeAt(i);
-        if (chr === BSLASH) escape = !escape;
+        // a backslash is a plain character inside a backtick-quoted identifier
+        if (chr === BSLASH && !(inQuote && qchr === BACKTICK)) escape = !escape;
         else {
           if (escape) {
             escape = false;
@@ -39,7 +41,10 @@ function parse(query) {
               continue;
             }
             inQuote = false;
-          } else if (!inQuote && (chr === DQUOTE || chr === SQUOTE)) {
+          } else if (
+            !inQuote &&
+            (chr === DQUOTE || chr === SQUOTE || chr === BACKTICK)
+          ) {
             inQuote = true;
             qchr = chr;
           }
