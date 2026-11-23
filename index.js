@@ -4,17 +4,29 @@
 // License: https://github.com/mscdex/node-mariasql/blob/master/LICENSE
 
 const RE_PARAM = /(?:\?)|(?::(\d+|(?:[a-zA-Z][a-zA-Z0-9_]*)))/g,
+  BLOCK_COMMENT = 1,
+  LINE_COMMENT = 2,
+  NEWLINE = 10,
+  SPACE = 32,
+  HASH = 35,
+  BANG = 33,
+  PLUS = 43,
+  ASTERISK = 42,
+  DASH = 45,
+  SLASH = 47,
   DQUOTE = 34,
   SQUOTE = 39,
+  BACKTICK = 96,
   BSLASH = 92;
 
-function parse(query) {
+function parse(query, postgres) {
   let ppos = RE_PARAM.exec(query);
   let curpos = 0;
   let start = 0;
   let end;
   const parts = [];
   let inQuote = false;
+  let comment = 0;
   let escape = false;
   let qchr;
   const tokens = [];
@@ -26,7 +38,17 @@ function parse(query) {
     do {
       for (i = curpos, end = ppos.index; i < end; ++i) {
         const chr = query.charCodeAt(i);
-        if (chr === BSLASH) escape = !escape;
+        if (comment) {
+          if (comment === LINE_COMMENT) {
+            if (chr === NEWLINE) comment = 0;
+          } else if (chr === ASTERISK && query.charCodeAt(i + 1) === SLASH) {
+            comment = 0;
+            ++i;
+          }
+          continue;
+        }
+        // a backslash is a plain character inside a backtick-quoted identifier
+        if (chr === BSLASH && !(inQuote && qchr === BACKTICK)) escape = !escape;
         else {
           if (escape) {
             escape = false;
@@ -39,14 +61,29 @@ function parse(query) {
               continue;
             }
             inQuote = false;
-          } else if (!inQuote && (chr === DQUOTE || chr === SQUOTE)) {
+          } else if (
+            !inQuote &&
+            (chr === DQUOTE || chr === SQUOTE || chr === BACKTICK)
+          ) {
             inQuote = true;
             qchr = chr;
+          } else if (!inQuote) {
+            const next = query.charCodeAt(i + 1);
+            if (chr === SLASH && next === ASTERISK) {
+              // /*! and /*+ are executed or read by MySQL, so they are not comments
+              const marker = query.charCodeAt(i + 2);
+              if (marker !== BANG && marker !== PLUS) {
+                comment = BLOCK_COMMENT;
+                ++i;
+              }
+            } else if (chr === DASH && next === DASH) {
+              if (query.charCodeAt(i + 2) <= SPACE) comment = LINE_COMMENT;
+            } else if (chr === HASH && !postgres) comment = LINE_COMMENT;
           }
         }
       }
       escape = false;
-      if (!inQuote) {
+      if (!inQuote && !comment) {
         parts.push(query.substring(start, end));
         tokens.push(ppos[0].length === 1 ? qcnt++ : ppos[1]);
         start = end + ppos[0].length;
@@ -56,7 +93,7 @@ function parse(query) {
     } while ((ppos = RE_PARAM.exec(query)));
 
     if (tokens.length) {
-      if (curpos < query.length) {
+      if (lastTokenEndPos < query.length) {
         parts.push(query.substring(lastTokenEndPos));
       }
       return [parts, tokens];
@@ -149,7 +186,7 @@ function createCompiler(config) {
 
 // named :one :two to postgres-style numbered $1 $2 $3
 function toNumbered(q, params) {
-  const tree = parse(q);
+  const tree = parse(q, true);
   const paramsArr = [];
   if (tree.length === 1) {
     return [tree[0], paramsArr];
