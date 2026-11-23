@@ -162,6 +162,183 @@ describe('given input query with named parameters', () => {
   });
 });
 
+describe('given input query with comments', () => {
+  const p = { a: 'A', b: 'B' };
+
+  it('should skip placeholders inside a block comment', () => {
+    assert.deepEqual(compile('SELECT /* :a */ :b AS b', p), [
+      'SELECT /* :a */ ? AS b',
+      ['B'],
+    ]);
+  });
+
+  it('should skip placeholders inside a "-- " line comment', () => {
+    assert.deepEqual(compile('SELECT 1 -- :a\n, :b AS b', p), [
+      'SELECT 1 -- :a\n, ? AS b',
+      ['B'],
+    ]);
+  });
+
+  it('should skip placeholders inside a "#" line comment', () => {
+    assert.deepEqual(compile('SELECT 1 # :a\n, :b AS b', p), [
+      'SELECT 1 # :a\n, ? AS b',
+      ['B'],
+    ]);
+  });
+
+  it('should not take a value slot for "?" inside a comment', () => {
+    assert.deepEqual(compile('SELECT /* ? */ :a, :b -- ?', p), [
+      'SELECT /* ? */ ?, ? -- ?',
+      ['A', 'B'],
+    ]);
+  });
+
+  it('should treat an apostrophe inside a line comment as text', () => {
+    assert.deepEqual(compile("SELECT 1 -- dan's comment\n, :a, :b", p), [
+      "SELECT 1 -- dan's comment\n, ?, ?",
+      ['A', 'B'],
+    ]);
+    assert.deepEqual(compile("SELECT /* dan's */ :a, :b", p), [
+      "SELECT /* dan's */ ?, ?",
+      ['A', 'B'],
+    ]);
+  });
+
+  it('should not let a backslash inside a comment escape the next character', () => {
+    assert.deepEqual(compile('SELECT /* \\*/ :a', p), [
+      'SELECT /* \\*/ ?',
+      ['A'],
+    ]);
+  });
+
+  it('should close a block comment at the first "*/"', () => {
+    assert.deepEqual(compile('SELECT /* c */* FROM t WHERE id = :a', p), [
+      'SELECT /* c */* FROM t WHERE id = ?',
+      ['A'],
+    ]);
+    assert.deepEqual(compile('SELECT /*/ :a */ :b', p), [
+      'SELECT /*/ :a */ ?',
+      ['B'],
+    ]);
+  });
+
+  it('should not start a line comment inside a block comment', () => {
+    assert.deepEqual(compile('SELECT /* -- */ :a', p), [
+      'SELECT /* -- */ ?',
+      ['A'],
+    ]);
+  });
+
+  it('should find placeholders after a comment that follows a quoted string', () => {
+    assert.deepEqual(compile("SELECT 'x' /* :a */, :b", p), [
+      "SELECT 'x' /* :a */, ?",
+      ['B'],
+    ]);
+    assert.deepEqual(compile('SELECT "x" -- :a\n, :b', p), [
+      'SELECT "x" -- :a\n, ?',
+      ['B'],
+    ]);
+  });
+
+  it('should treat a comment starter inside a quoted string as text', () => {
+    assert.deepEqual(compile('SELECT "/* " , :a, " */"', p), [
+      'SELECT "/* " , ?, " */"',
+      ['A'],
+    ]);
+    assert.deepEqual(compile("SELECT '-- ', :a, '# '", p), [
+      "SELECT '-- ', ?, '# '",
+      ['A'],
+    ]);
+  });
+
+  it('should still convert placeholders inside "/*!" and "/*+"', () => {
+    assert.deepEqual(compile('SELECT /*! :a */ :b', p), [
+      'SELECT /*! ? */ ?',
+      ['A', 'B'],
+    ]);
+    assert.deepEqual(compile('SELECT /*+ MAX_EXECUTION_TIME(:a) */ :b', p), [
+      'SELECT /*+ MAX_EXECUTION_TIME(?) */ ?',
+      ['A', 'B'],
+    ]);
+  });
+
+  it('should not treat "--" without trailing whitespace as a comment', () => {
+    assert.deepEqual(compile('SELECT --:a, 5--:b', p), [
+      'SELECT --?, 5--?',
+      ['A', 'B'],
+    ]);
+  });
+
+  it('should treat an unterminated block comment as running to the end', () => {
+    assert.deepEqual(compile('SELECT :a /* :b', p), ['SELECT ? /* :b', ['A']]);
+  });
+
+  it('should find a placeholder right after a closed comment', () => {
+    assert.deepEqual(compile('SELECT /* c */:a', p), [
+      'SELECT /* c */?',
+      ['A'],
+    ]);
+  });
+
+  it('should keep "::name" working next to a comment', () => {
+    assert.deepEqual(compile('SELECT /* :a */ ::b, :a', p), [
+      'SELECT /* :a */ ??, ?',
+      ['B', 'A'],
+    ]);
+  });
+
+  it('should close a block comment at the first "*/" without nesting', () => {
+    assert.deepEqual(compile('SELECT /* /* :a */ :b */', p), [
+      'SELECT /* /* :a */ ? */',
+      ['B'],
+    ]);
+  });
+
+  it('should compile a query with comments the same twice', () => {
+    const query = 'SELECT /* :a */ :b -- ?\n, :a';
+    const expected = ['SELECT /* :a */ ? -- ?\n, ?', ['B', 'A']];
+    assert.deepEqual(compile(query, p), expected);
+    assert.deepEqual(compile(query, p), expected);
+  });
+
+  it('should return a query with only commented placeholders untouched', () => {
+    assert.deepEqual(compile('SELECT 1 /* :a ? */', p), [
+      'SELECT 1 /* :a ? */',
+      [],
+    ]);
+  });
+
+  it('should read a comment starter inside a backtick-quoted identifier as plain text', () => {
+    assert.deepEqual(
+      compile('SELECT `Invoice #`, `a -- b`, `c /* d` FROM t WHERE id = :id', {
+        id: 7,
+      }),
+      ['SELECT `Invoice #`, `a -- b`, `c /* d` FROM t WHERE id = ?', [7]]
+    );
+  });
+
+  it('should read "--" followed by a tab as a comment', () => {
+    assert.deepEqual(
+      compile('SELECT 1 --\t:a\n, :b AS b', { a: 'A', b: 'B' }),
+      ['SELECT 1 --\t:a\n, ? AS b', ['B']]
+    );
+  });
+
+  it('should keep the text after the last placeholder when the query ends inside an open quote', () => {
+    assert.deepEqual(compile("SELECT :a, ':b", { a: 'A', b: 'B' }), [
+      "SELECT ?, ':b",
+      ['A'],
+    ]);
+  });
+
+  it('should skip comments the same way through compile.parse', () => {
+    assert.deepEqual(compile.parse('SELECT 1 # :a\n, :b'), [
+      ['SELECT 1 # :a\n, '],
+      ['b'],
+    ]);
+  });
+});
+
 describe('postgres-style toNumbered conversion', () => {
   it('basic test', () => {
     const toNumbered = require('..').toNumbered;
@@ -178,6 +355,28 @@ describe('postgres-style toNumbered conversion', () => {
         'SELECT usr.p_pause_stop_track($1, $2, $3, 20, $4)',
         [123, 456, 678, 345],
       ]
+    );
+  });
+});
+
+describe('postgres-style toNumbered with comments', () => {
+  const toNumbered = require('..').toNumbered;
+
+  it('should keep "#" as an operator', () => {
+    assert.deepEqual(
+      toNumbered('SELECT a #> :path FROM t WHERE id = :id AND b # :b', {
+        path: 'p',
+        id: 1,
+        b: 2,
+      }),
+      ['SELECT a #> $1 FROM t WHERE id = $2 AND b # $3', ['p', 1, 2]]
+    );
+  });
+
+  it('should skip "-- " and block comments', () => {
+    assert.deepEqual(
+      toNumbered('SELECT /* :a */ :b -- :a\n, :c', { a: 1, b: 2, c: 3 }),
+      ['SELECT /* :a */ $1 -- :a\n, $2', [2, 3]]
     );
   });
 });
